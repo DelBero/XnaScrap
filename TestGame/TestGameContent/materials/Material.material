@@ -1,0 +1,16 @@
+<Material>
+	<Textures>
+		<Texture TextureUnit="0" Texture="textures/sw" />
+	</Textures>
+  <Effect>
+    <EffectName>effects/Blinn</EffectName>
+    <Technique>Main</Technique>
+  </Effect>
+  <ParameterMap>
+    <Parameter Name="WorldITXf" perInstance="true" Semantic="MODEL_INV_TRANS_MATRIX"></Parameter>
+    <Parameter Name="WvpXf" perInstance="true" Semantic="MODEL_VIEW_PROJECTION_MATRIX"></Parameter>
+    <Parameter Name="WorldXf" perInstance="true" Semantic="MODEL_MATRIX"></Parameter>
+    <Parameter Name="ViewIXf" perInstance="true" Semantic="VIEW_INV_MATRIX"></Parameter>
+    <Parameter Name="ColorTexture" perInstance="true" Semantic="TEXTURE2D0"></Parameter>
+  </ParameterMap>
+</Material>

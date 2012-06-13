@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Root>
+  <Main ObjectId="" ModelName="" Position="">
+    <GameObject Id="ObjectId">
+      <Element Type="Renderable3D">
+        <Parameter Name="model">
+          <Value>ModelName</Value>
+        </Parameter>
+        <Parameter Name="material">
+          <Value>materials/Material</Value>
+        </Parameter>
+      </Element>
+      <Element Type="StaticPosition3D">
+        <Parameter Name="position">
+          <Value>Position</Value>
+        </Parameter>
+      </Element>
+    </GameObject>
+  </Main>
+</Root>

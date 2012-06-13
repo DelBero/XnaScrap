@@ -1,0 +1,18 @@
+<Root><Main>
+<CreateId/><GameObject>
+<Element Type="SkinnedRenderable3D">
+<Parameter Name="model">
+<Value>Character02</Value>
+</Parameter>
+  <Parameter Name="material">
+    <Value></Value>
+  </Parameter>
+<Parameter Name="scale">
+<Value>1,1,1</Value>
+</Parameter>
+<Parameter Name="layer">
+<Value>0</Value>
+</Parameter>
+</Element>
+</GameObject>
+</Main></Root>

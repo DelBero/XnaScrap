@@ -1,0 +1,63 @@
+<Root><Main>
+<GameObject Id="Camera">
+<Element Type="StaticPosition2D">
+<Parameter Name="position">
+<Value>0.5,0.5</Value>
+</Parameter>
+</Element>
+<Element Type="Renderable2D">
+<Parameter Name="material">
+<Value>materials/Material</Value>
+</Parameter>
+<Parameter Name="scale">
+<Value>0.1,0.1</Value>
+</Parameter>
+</Element>
+<Element Type="TouchRotationCircle3D">
+<Parameter Name="invertY">
+<Value>False</Value>
+</Parameter>
+<Parameter Name="invertX">
+<Value>False</Value>
+</Parameter>
+<Parameter Name="scale">
+<Value>0.0001</Value>
+</Parameter>
+<Parameter Name="Radius">
+<Value>100</Value>
+</Parameter>
+</Element>
+<Element Type="Camera">
+<Parameter Name="renderTarget">
+<Value>Default</Value>
+</Parameter>
+<Parameter Name="Frustum">
+<Parameter Name="fovy">
+<Value>45</Value>
+</Parameter>
+<Parameter Name="near">
+<Value>1</Value>
+</Parameter>
+<Parameter Name="far">
+<Value>1000</Value>
+</Parameter>
+<Parameter Name="aspect">
+<Value>1,333333</Value>
+</Parameter>
+</Parameter>
+<Parameter Name="Viewport">
+<Parameter Name="x">
+<Value>-1</Value>
+</Parameter>
+<Parameter Name="y">
+<Value>-1</Value>
+</Parameter>
+</Parameter>
+</Element>
+<Element Type="StaticPosition3D">
+<Parameter Name="position">
+<Value>0,0,200</Value>
+</Parameter>
+</Element>
+</GameObject>
+</Main></Root>

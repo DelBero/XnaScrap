@@ -1,0 +1,5 @@
+<Project Name="TestGameProject" ExportPath="" Path="C:\Daten\Programmierung\XnaScrap\TestGame\TestGameContent\project" ExportFilter="True" ScriptType=".xmlScript">
+  <Files>
+    <File Filename="AnimationTest.ctl" Script="AnimationTest" />
+  </Files>
+</Project>

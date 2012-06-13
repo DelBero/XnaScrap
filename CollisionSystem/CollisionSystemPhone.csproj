@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{DCDDA0BC-5A54-45DD-9EBC-01C0C01C788B}</ProjectGuid>
+    <ProjectTypeGuids>{6D335F3A-9D43-41b4-9D22-F6F17C4BE596};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">Windows Phone</Platform>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>CollisionSystem</RootNamespace>
+    <AssemblyName>CollisionSystemPhone</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <XnaFrameworkVersion>v4.0</XnaFrameworkVersion>
+    <XnaPlatform>Windows Phone</XnaPlatform>
+    <XnaProfile>Reach</XnaProfile>
+    <XnaCrossPlatformGroupID>c77b8cf7-9234-4dee-ae85-54c70e54b398</XnaCrossPlatformGroupID>
+    <XnaOutputType>Library</XnaOutputType>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Windows Phone' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Windows Phone\Debug</OutputPath>
+    <DefineConstants>DEBUG;TRACE;WINDOWS_PHONE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <NoStdLib>true</NoStdLib>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <XnaCompressContent>false</XnaCompressContent>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Windows Phone' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Windows Phone\Release</OutputPath>
+    <DefineConstants>TRACE;WINDOWS_PHONE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <NoStdLib>true</NoStdLib>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <XnaCompressContent>false</XnaCompressContent>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Xna.Framework">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Game">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Graphics">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.GamerServices">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Input.Touch">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="mscorlib">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DataStructures\Defines.cs" />
+    <Compile Include="DataStructures\IMeshNode.cs" />
+    <Compile Include="DataStructures\NavigationMesh.cs" />
+    <Compile Include="DataStructures\NavigationTriangle.cs" />
+    <Compile Include="Delegates\Delegates.cs" />
+    <Compile Include="Elements\ColliderElement.cs" />
+    <Compile Include="Elements\Collider\BoxCollider.cs" />
+    <Compile Include="Elements\Collider\CapsuleCollider.cs" />
+    <Compile Include="Elements\Collider\CylinderCollider.cs" />
+    <Compile Include="Elements\Collider\HeightfieldCollider.cs" />
+    <Compile Include="Elements\Collider\AbstractCollider.cs" />
+    <Compile Include="Elements\Collider\MeshCollider.cs" />
+    <Compile Include="Elements\Collider\OrientedBoxCollider.cs" />
+    <Compile Include="Elements\Collider\PlaneCollider.cs" />
+    <Compile Include="Elements\Collider\SphereCollider.cs" />
+    <Compile Include="Elements\CollisionAviodanceElement.cs" />
+    <Compile Include="Elements\CollisionDetectionElement.cs" />
+    <Compile Include="Elements\CollisionElement.cs" />
+    <Compile Include="Elements\NavigationMeshElement.cs" />
+    <Compile Include="Elements\NavigationMeshPose3D.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\Collision.cs" />
+    <Compile Include="Service\CollisionManager.cs" />
+    <Compile Include="Service\NavigationMeshService.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SceneManagement\SceneManagementPhone.csproj">
+      <Project>{42A15EA9-B891-435E-BB8F-F61E825D9AB9}</Project>
+      <Name>SceneManagementPhone</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\XnaScrapCore\XnaScrapCorePhone.csproj">
+      <Project>{0B4C0331-5356-41DA-A43E-4FFA98BFEE56}</Project>
+      <Name>XnaScrapCorePhone</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DataStructures\.svn\entries" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>$(SolutionDir)deploy_local_phone.cmd</PostBuildEvent>
+  </PropertyGroup>
+  <!--
+      To modify your build process, add your task inside one of the targets below and uncomment it. 
+      Other similar extension points exist, see Microsoft.Common.targets.
+      <Target Name="BeforeBuild">
+      </Target>
+      <Target Name="AfterBuild">
+      </Target>
+    -->
+</Project>

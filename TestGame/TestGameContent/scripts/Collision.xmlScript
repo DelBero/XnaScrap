@@ -1,0 +1,63 @@
+<Root><Main>
+<GameObject Id="Box">
+<Element Type="CollisionElement">
+</Element>
+<Element Type="BoxCollider">
+<Parameter Name="collisionGroup">
+<Value>B883DA68-2A4E-4D57-ADAC-AE615E2E841A</Value>
+</Parameter>
+<Parameter Name="position">
+<Value>0,0,0</Value>
+</Parameter>
+<Parameter Name="min">
+<Value>-0,5,-0,5,-0,5</Value>
+</Parameter>
+<Parameter Name="max">
+<Value>0,5,0,5,0,5</Value>
+</Parameter>
+<Parameter Name="scale">
+<Value>1,1,1</Value>
+</Parameter>
+</Element>
+<Element Type="StaticPosition3D">
+<Parameter Name="position">
+<Value>2,4,3</Value>
+</Parameter>
+</Element>
+<Element Type="Renderable3D">
+<Parameter Name="model">
+<Value>Box01</Value>
+</Parameter>
+<Parameter Name="material">
+<Value></Value>
+</Parameter>
+<Parameter Name="scale">
+<Value>30,30,1</Value>
+</Parameter>
+</Element>
+</GameObject>
+<GameObject Id="Plane">
+<Element Type="StaticPosition3D">
+<Parameter Name="position">
+<Value>0,0,0</Value>
+</Parameter>
+</Element>
+<Element Type="BoxCollider">
+<Parameter Name="collisionGroup">
+<Value>B883DA68-2A4E-4D57-ADAC-AE615E2E841A</Value>
+</Parameter>
+<Parameter Name="position">
+<Value>0,0,0</Value>
+</Parameter>
+<Parameter Name="min">
+<Value>-0,5,-0,5,-0,5</Value>
+</Parameter>
+<Parameter Name="max">
+<Value>0,5,0,5,0,5</Value>
+</Parameter>
+<Parameter Name="scale">
+<Value>40,0.1,40</Value>
+</Parameter>
+</Element>
+</GameObject>
+</Main></Root>
