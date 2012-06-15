@@ -23,6 +23,10 @@ using XnaScrapREST.REST;
 using XnaScrapREST.Services;
 using System.Xml;
 using XnaScrapREST.REST.Nodes;
+using CBero.Service.GraphicDeviceManagement;
+#if WINDOWS
+using System.Diagnostics;
+#endif
 
 
 namespace CBero.Service
@@ -34,17 +38,67 @@ namespace CBero.Service
     {
         public const int MAX_TEXTURES = 4;
         public const int MAX_LAYERS = 32;
+
+        public struct TargetWindow
+        {
+            public int ProcessId;
+            public string ChildWndCaption;
+            public string ControlName;
+
+            public bool TopLvl()
+            {
+                return ProcessId > 0;
+            }
+            public bool SubLvl()
+            {
+                return ( ChildWndCaption != null && ChildWndCaption != string.Empty);
+            }
+
+            public bool Control()
+            {
+                return (ControlName != null && ControlName != string.Empty);
+            }
+        }
+
+        private static RenderManager m_current;
+        public static RenderManager Current
+        {
+            get { return m_current; }
+        }
+
         #region member
+        #region IComponent
         private static Guid m_componentId = new Guid("D3F71433-1503-42C7-B838-D1FFD6F4C27F");
         public Guid Component_ID
         {
             get { return m_componentId; }
         }
-
+        #endregion
+        #region devicemanager
+        GraphicsDeviceManager m_deviceManager = null;
+        #endregion
+        #region rendering stuff
         private List<RenderLayer> m_layers = new List<RenderLayer>();
+
+        public List<RenderLayer> Layers
+        {
+            get { return m_layers; }
+        }
         private List<IRenderable2D> m_overlays = new List<IRenderable2D>();
         private List<ITextRenderable> m_texts = new List<ITextRenderable>();
         private Dictionary<XnaScrapId, IRenderTarget> m_renderTargets = new Dictionary<XnaScrapId, IRenderTarget>();
+
+        public Dictionary<XnaScrapId, IRenderTarget> RenderTargets
+        {
+            get { return m_renderTargets; }
+        }
+
+        private Dictionary<XnaScrapId, ICamera> m_cameras = new Dictionary<XnaScrapId, ICamera>();
+
+        public Dictionary<XnaScrapId, ICamera> Cameras
+        {
+            get { return m_cameras; }
+        }
 
         static private Material m_basicEffectMaterial = new Material();
 
@@ -84,7 +138,7 @@ namespace CBero.Service
         SpriteBatch m_spriteBatch;
 
         RenderTargetCollection m_defaultCollection;
-
+        #endregion
         #region performance
         PerformanceSegment m_mainTimer = null;
         PerformanceSegment m_sceneTimer = null;
@@ -95,12 +149,61 @@ namespace CBero.Service
         #endregion
         #endregion
 
-        public RenderManager(Game game)
+        public RenderManager(Game game, GraphicsDeviceManager deviceManager)
             : base(game)
+        {
+            _construct(game, deviceManager);
+            m_current = this;
+        }
+
+        /// <summary>
+        /// Render to a window of another process. Not possible  if deviceManager is not null or there is already a device manager installed.
+        /// </summary>
+        /// <param name="game"></param>
+        /// <param name="deviceManager"></param>
+        /// <param name="target"></param>
+        public RenderManager(Game game, GraphicsDeviceManager deviceManager, TargetWindow target)
+            : base(game)
+        {
+            if (deviceManager == null)
+            {
+                CBeroGraphicsDeviceManager devMgr = new CBeroGraphicsDeviceManager(Game);
+                if (target.TopLvl())
+                {
+                    if (target.SubLvl())
+                    {
+                        if (target.Control())
+                        {
+                            devMgr.SetToSubCtrlWindow(target.ProcessId, target.ChildWndCaption, target.ControlName);
+                        }
+                        else
+                        {
+                            devMgr.SetToSubWindow(target.ProcessId, target.ChildWndCaption);
+                        }
+                    }
+                    else
+                    {
+                        devMgr.SetToTopWindow(target.ProcessId);
+                    }
+                }
+                deviceManager = devMgr;
+            }
+            _construct(game, deviceManager);
+        }
+
+        private void _construct(Game game, GraphicsDeviceManager deviceManager)
         {
             Game.Components.Add(this);
             Game.Services.AddService(typeof(IRenderManager), this);
             Game.Services.AddService(typeof(RenderManager), this);
+
+            m_deviceManager = deviceManager;
+            if (m_deviceManager == null)
+            {
+                m_deviceManager = new CBeroGraphicsDeviceManager(Game);
+                m_deviceManager.PreferredDepthStencilFormat = DepthFormat.Depth24;
+                m_deviceManager.ApplyChanges();
+            }
 
             m_renderState.Push(new RenderState(this));
 
@@ -138,7 +241,6 @@ namespace CBero.Service
                 netCtrlService.AddServiceNode(new RenderManagerNode(this), this);
             }
 #endif
-
             base.Initialize();
             m_spriteBatch = new SpriteBatch(GraphicsDevice);
             GraphicsDevice.DepthStencilState = DepthStencilState.Default;
@@ -236,6 +338,9 @@ namespace CBero.Service
 
             foreach (IRenderTarget renderTarget in m_renderTargets.Values)
             {
+                if (!renderTarget.Active)
+                    continue;
+
                 RenderState.PushRenderTarget(renderTarget);
                 foreach (ICamera camera in renderTarget.Cameras)
                 {
@@ -251,10 +356,11 @@ namespace CBero.Service
                     }
                     RenderState.PopCamera();
                 }
+                renderTarget.Present();
                 RenderState.PopRenderTarget();
             }
 
-            // perofrmance
+            // performance
             if (m_mainTimer != null)
                 m_mainTimer.Watch.Stop();
 
@@ -692,6 +798,46 @@ namespace CBero.Service
             }
         }
         #endregion
+
+        public bool addRemoteRenderTarget(int processId,
+                                            Nullable<Rectangle> sourceRectangle = null,
+                                            Nullable<Rectangle> destinationRectangle = null)
+        {
+            if (processId <= 0)
+                return false;
+            try
+            {
+                Process p = Process.GetProcessById(processId);
+                if (p != null)
+                {
+                    return addRemoteRenderTarget(p.MainWindowHandle, sourceRectangle, destinationRectangle);
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return false;
+        }
+
+        public bool addRemoteRenderTarget(  IntPtr overrideWindowHandle,
+                                            Nullable<Rectangle> sourceRectangle = null,
+                                            Nullable<Rectangle> destinationRectangle = null
+                                            )
+        {
+            RemoteWindowRenderTarget remoteTarget = new RemoteWindowRenderTarget(sourceRectangle, destinationRectangle, overrideWindowHandle, GraphicsDevice);
+            CBeroEffect effect = new CBeroEffect(this);
+            RenderTargetCollection remoteCollection = new RenderTargetCollection(remoteTarget.Id, new IRenderTarget[] { remoteTarget });
+            remoteCollection.Effect = effect;
+            effect.AddPass(new RenderSceneWithMaterialsPass(this, remoteCollection));
+            effect.AddPass(new RenderOverlaysPass(this, remoteCollection));
+
+            remoteTarget.Cameras.Add(m_defaultCollection.Cameras.First());
+
+            // add DefaultRenderTarget
+            m_renderTargets.Add(remoteTarget.Id, remoteCollection);
+            return true;
+        }
     }
 #if WINDOWS
     public class RenderManagerNode : IRestNode
@@ -718,12 +864,18 @@ namespace CBero.Service
                                         , "FogColor"
                                         , m_renderManager.RenderState.SetFogColor
                                         , m_renderManager.RenderState.GetFogColor));
+
+            m_subs.addNode(new RenderTargetEnumeratorNode(m_renderManager));
+
+            m_subs.addNode(new CameraEnumeratorNode(m_renderManager));
+
+            m_subs.addNode(new EffectEnumeratorNode(m_renderManager));
         }
         #endregion
         #region IRestNode Members
         public string Name
         {
-            get { return "RenderManagerNode"; }
+            get { return "RenderManager"; }
         }
 
         private object m_data = null;
@@ -768,10 +920,242 @@ namespace CBero.Service
 
         public IRestNode OnElement(string elementName)
         {
-            foreach (IRestNode node in m_subs)
+            if (m_subs != null)
             {
-                if (node.Name.ToLower().Equals(elementName.ToLower()))
-                    return node;
+                m_subs.Data = m_renderManager;
+                return m_subs.OnElement(elementName);
+            }
+            return null;
+        }
+
+        #endregion
+    }
+
+    public class CameraEnumeratorNode : IRestNode
+    {
+        #region member
+        private RenderManager m_renderManager;
+        private NodeList m_subs = new NodeList("Cameras");
+        #endregion
+        #region CDtors
+        public CameraEnumeratorNode(RenderManager renderManager)
+        {
+            m_renderManager = renderManager;
+        }
+        #endregion
+        #region IRestNode Members
+        public string Name
+        {
+            get { return "Cameras"; }
+        }
+
+        private object m_data = null;
+        public object Data
+        {
+            set { m_data = value; }
+        }
+
+        public XmlNodeList Get(string resourcePath)
+        {
+            XmlDocument doc = new XmlDocument();
+            XmlElement elements = doc.CreateElement("Cameras");
+
+            if (m_data is IRenderTarget)
+            {
+                IRenderTarget target = m_data as IRenderTarget;
+                foreach (ICamera camera in target.Cameras)
+                {
+                    XmlElement property = doc.CreateElement("Camera");
+                    property.SetAttribute("Name", camera.ToString());
+                    elements.AppendChild(property);
+                }
+            }
+            else if (m_data is RenderManager)
+            {
+                return elements.ChildNodes;
+            }
+
+            return elements.ChildNodes;
+        }
+
+        public string Post(string data)
+        {
+            return "ok";
+        }
+
+        public string Put(string data)
+        {
+            return "ok";
+        }
+
+        public string Delete(string data)
+        {
+            return "ok";
+        }
+
+        public bool HasSub()
+        {
+            return true;
+        }
+
+        public IRestNode OnElement(string elementName)
+        {
+            if (m_subs != null)
+                m_subs.Data = m_renderManager.getRenderTarget(new XnaScrapId(elementName));
+            return m_subs;
+        }
+
+        #endregion
+    }
+
+    public class EffectEnumeratorNode : IRestNode
+    {
+        #region member
+        private RenderManager m_renderManager;
+        private NodeList m_subs = new NodeList("Effects");
+        #endregion
+        #region CDtors
+        public EffectEnumeratorNode(RenderManager renderManager)
+        {
+            m_renderManager = renderManager;
+        }
+        #endregion
+        #region IRestNode Members
+        public string Name
+        {
+            get { return "Effects"; }
+        }
+
+        private object m_data = null;
+        public object Data
+        {
+            set { m_data = value; }
+        }
+
+        public XmlNodeList Get(string resourcePath)
+        {
+            XmlDocument doc = new XmlDocument();
+            XmlElement elements = doc.CreateElement("Effects");
+
+            if (m_data is IRenderTarget)
+            {
+                IRenderTarget target = m_data as IRenderTarget;
+                CBeroEffect effect = target.Effect;
+                {
+                    XmlElement property = doc.CreateElement("Effect");
+                    property.SetAttribute("Name", effect.ToString());
+                    elements.AppendChild(property);
+                }
+            }
+            else if (m_data is RenderManager)
+            {
+                return elements.ChildNodes;
+            }
+
+            return elements.ChildNodes;
+        }
+
+        public string Post(string data)
+        {
+            return "ok";
+        }
+
+        public string Put(string data)
+        {
+            return "ok";
+        }
+
+        public string Delete(string data)
+        {
+            return "ok";
+        }
+
+        public bool HasSub()
+        {
+            return true;
+        }
+
+        public IRestNode OnElement(string elementName)
+        {
+            if (m_subs != null)
+            {
+                m_subs.Data = m_renderManager.getRenderTarget(new XnaScrapId(elementName));
+                return m_subs.OnElement(elementName);
+            }
+            return m_subs;
+        }
+
+        #endregion
+    }
+
+    public class RenderTargetEnumeratorNode : IRestNode
+    {
+        #region member
+        private RenderManager m_renderManager;
+        private NodeList m_subs = new NodeList("RenderTargets");
+        #endregion
+        #region CDtors
+        public RenderTargetEnumeratorNode(RenderManager renderManager)
+        {
+            m_renderManager = renderManager;
+
+            m_subs.addNode(new CameraEnumeratorNode(m_renderManager));
+
+            m_subs.addNode(new EffectEnumeratorNode(m_renderManager));
+        }
+        #endregion
+        #region IRestNode Members
+        public string Name
+        {
+            get { return "RenderTargets"; }
+        }
+
+        private object m_data = null;
+        public object Data
+        {
+            set { m_data = value; }
+        }
+
+        public XmlNodeList Get(string resourcePath)
+        {
+            XmlDocument doc = new XmlDocument();
+            XmlElement elements = doc.CreateElement("RenderTargets");
+
+            foreach (XnaScrapId target in m_renderManager.RenderTargets.Keys)
+            {
+                XmlElement property = doc.CreateElement("RenderTarget");
+                property.SetAttribute("Name", target.ToString());
+                elements.AppendChild(property);
+            }
+            return elements.ChildNodes;
+        }
+
+        public string Post(string data)
+        {
+            return "ok";
+        }
+
+        public string Put(string data)
+        {
+            return "ok";
+        }
+
+        public string Delete(string data)
+        {
+            return "ok";
+        }
+
+        public bool HasSub()
+        {
+            return true;
+        }
+
+        public IRestNode OnElement(string elementName)
+        {
+            if (m_subs != null)
+            {
+                m_subs.Data = m_renderManager.getRenderTarget(new XnaScrapId(elementName));
+                return m_subs;
             }
             return null;
         }

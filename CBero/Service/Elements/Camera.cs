@@ -179,6 +179,9 @@ namespace CBero.Service.Elements
             m_projection = Matrix.CreatePerspectiveFieldOfView(f, m_aspect, m_near, m_far);
 
             m_viewport = new _Viewport(state);
+
+
+            m_renderManager.Cameras.Add(new XnaScrapId("ImplementCameraNamingYouJerk!"), this);
         }
 
         /// <summary>
@@ -291,6 +294,8 @@ namespace CBero.Service.Elements
             {
                 renderTarget.Cameras.Remove(this);
             }
+
+            m_renderManager.Cameras.Remove(new XnaScrapId("ImplementCameraNamingYouJerk!"));
 
             base.doDestroy();
         }

@@ -2,27 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using CBero.Service.Elements;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using CBero.Service.Elements.Interfaces;
 using XnaScrapCore.Core;
 using CBero.Service.CBeroEffects;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
 
 namespace CBero.Service
 {
-    public class DefaultRenderTarget : IRenderTarget
+    public class RemoteWindowRenderTarget : IRenderTarget
     {
         #region members
-        private static DefaultRenderTarget m_instance = null;
-        public static DefaultRenderTarget GetInstance()
-        {
-            if (m_instance == null)
-            {
-                m_instance = new DefaultRenderTarget();
-            }
-            return m_instance;
-        }
+        Nullable<Rectangle> m_sourceRectangle = null;
+        Nullable<Rectangle> m_destinationRectangle = null;
+        IntPtr m_overrideWindowHandle;
+        GraphicsDevice m_device;
         #endregion
         #region IRenderTarget Members
         private bool m_active = true;
@@ -38,7 +32,7 @@ namespace CBero.Service
             get { return m_cameras; }
         }
 
-        public static XnaScrapId DEFAULT_RENDERTARGET_ID = new XnaScrapId("Default");
+        public static XnaScrapId DEFAULT_RENDERTARGET_ID = new XnaScrapId("RemoteDefault");
         public XnaScrapId Id
         {
             get { return DEFAULT_RENDERTARGET_ID; }
@@ -59,14 +53,20 @@ namespace CBero.Service
 
         public void Present()
         {
-            //RenderManager.Current.GraphicsDevice.Present();
+            m_device.Present(m_sourceRectangle, m_destinationRectangle, m_overrideWindowHandle);
         }
         #endregion
 
         #region CDtors
-        private DefaultRenderTarget()
+        public RemoteWindowRenderTarget(    Nullable<Rectangle> sourceRectangle,
+                                            Nullable<Rectangle> destinationRectangle,
+                                            IntPtr overrideWindowHandle,
+                                            GraphicsDevice device)
         {
-
+            m_sourceRectangle = sourceRectangle;
+            m_destinationRectangle = destinationRectangle;
+            m_overrideWindowHandle = overrideWindowHandle;
+            m_device = device;
         }
         #endregion
     }

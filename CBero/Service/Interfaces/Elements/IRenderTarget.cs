@@ -25,5 +25,13 @@ namespace CBero.Service.Elements.Interfaces
             get;
             set;
         }
+
+        bool Active
+        {
+            get;
+            set;
+        }
+
+        void Present();
     }
 }

@@ -19,6 +19,13 @@ namespace CBero.Service.CBeroEffects
             set { m_targets = value; }
         }
 
+        private bool m_active = true;
+        public bool Active
+        {
+            get { return m_active; }
+            set { m_active = value; }
+        }
+
         CBeroEffect m_effect;
 
         public CBeroEffect Effect
@@ -47,6 +54,7 @@ namespace CBero.Service.CBeroEffects
 
         public RenderTargetCollection(XnaScrapId id, IRenderTarget[] targets)
         {
+            m_id = id;
             for (int i = 0; i < 4; ++i)
             {
                 if (i < targets.Length)
@@ -54,7 +62,14 @@ namespace CBero.Service.CBeroEffects
             }
         }
 
-
+        public void Present()
+        {
+            foreach (IRenderTarget renderTarget in Targets)
+            {
+                if (renderTarget != null)
+                    renderTarget.Present();
+            }
+        }
 
     }
 }
