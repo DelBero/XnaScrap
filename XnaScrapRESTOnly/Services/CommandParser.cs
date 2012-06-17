@@ -23,50 +23,11 @@ namespace XnaScrapREST.Services
         public ICommand parse(NetCtrlService.Command command, NetCtrlService service)
         {
             ICommand cmd;
-            switch (command.header.type)
-            {
-                case (uint)CommandType.C_GET:
-                    {
-                        //GetCommand c = new GetCommand(service);
-                        RestCommand c = new RestCommand(service);
-                        c.CommnadType = CommandType.C_GET;
-                        c.Data = new String[] { command.command };
-                        cmd = c;
-                        break;
-                    }
-                case (uint)CommandType.C_POST:
-                    {
-                        //PostCommand c = new PostCommand(service);
-                        RestCommand c = new RestCommand(service);
-                        c.CommnadType = CommandType.C_POST;
-                        c.Data = new String[] { command.command };
-                        cmd = c;
-                        break;
-                    }
-                case (uint)CommandType.C_PUT:
-                    {
-                        //PostCommand c = new PostCommand(service);
-                        RestCommand c = new RestCommand(service);
-                        c.CommnadType = CommandType.C_PUT;
-                        c.Data = new String[] { command.command };
-                        cmd = c;
-                        break;
-                    }
-                case (uint)CommandType.C_DELETE:
-                    {
-                        RestCommand c = new RestCommand(service);
-                        c.CommnadType = CommandType.C_DELETE;
-                        c.Data = new String[] { command.command };
-                        cmd = c;
-                        break;
-                    }
-                default:
-                    {
-                        cmd = null;
-                        break;
-                    }
-            }
-
+            //GetCommand c = new GetCommand(service);
+            RestCommand c = new RestCommand(service);
+            c.CommnadType = CommandType.C_GET;
+            c.Data = new String[] { command.command };
+            cmd = c;
             return cmd;
         }
 

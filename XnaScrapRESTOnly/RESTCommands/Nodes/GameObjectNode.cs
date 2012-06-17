@@ -141,7 +141,8 @@ namespace XnaScrapREST.REST.Nodes
             if (m_activeGameObject == null && objectBuilder.GameObjects.TryGetValue(new XnaScrapId(elementName), out go))
             {
                 Data = go;
-                m_subNodes.Data = m_data;
+                if (m_subNodes != null)
+                    m_subNodes.Data = m_data;
             }
 
             return m_subNodes;
